@@ -1,0 +1,46 @@
+trigger:
+- '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: Build
+  displayName: 'Build Job'
+  steps:
+  - script: |
+      # Realize o build do aplicativo
+      npm install
+      npm run build
+    workingDirectory: $(System.DefaultWorkingDirectory)/src
+    displayName: 'Realizar Build'
+
+  - publish: $(System.DefaultWorkingDirectory)/src
+    artifact: drop
+    displayName: 'Publicar Artefatos de Build'
+
+- job: DeployDev
+  displayName: 'Deploy to Dev Job'
+  dependsOn: Build
+  condition: succeeded()
+  steps:
+  - download: current
+    artifact: drop
+    displayName: 'Baixar Artefatos de Build'
+
+  - script: |
+      # Realize a implantação no ambiente de desenvolvimento
+      # Isso pode incluir o upload dos artefatos para um servidor ou plataforma de hospedagem
+      echo 'Implantando no ambiente de desenvolvimento'
+    displayName: 'Implantar no Ambiente de Desenvolvimento'
+
+- job: DeployProd
+  displayName: 'Deploy to Prod Job'
+  dependsOn: DeployDev
+  condition: succeeded()
+  steps:
+  - script: |
+      # Realize a implantação no ambiente de produção
+      # Isso pode incluir o upload dos artefatos para um servidor ou plataforma de hospedagem
+      echo 'Implantando no ambiente de produção'
+    displayName: 'Implantar no Ambiente de Produção'
