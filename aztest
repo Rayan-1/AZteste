@@ -12,12 +12,12 @@ jobs:
       # Realize o build do aplicativo
       npm install
       npm run build
-    workingDirectory: $(System.DefaultWorkingDirectory)/src
     displayName: 'Realizar Build'
 
-  - publish: $(System.DefaultWorkingDirectory)/src
+  - publish: $(System.DefaultWorkingDirectory)
     artifact: drop
     displayName: 'Publicar Artefatos de Build'
+
 
 - job: DeployDev
   displayName: 'Deploy to Dev Job'
