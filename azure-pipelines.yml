@@ -1,46 +1,27 @@
 trigger:
-- '*'
+- master  # Define a branch que acionará o pipeline (substitua 'master' pelo nome da sua branch principal, se necessário)
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-latest'  # Define a imagem da máquina virtual para a compilação
 
-jobs:
-- job: Build
-  displayName: 'Build Job'
-  steps:
-  - script: |
-      # Realize o build do aplicativo
-      npm install
-      npm run build
-    workingDirectory: $(System.DefaultWorkingDirectory)/src
-    displayName: 'Realizar Build'
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'  # Escolha a versão do Python apropriada
 
-  - publish: $(System.DefaultWorkingDirectory)/src
-    artifact: drop
-    displayName: 'Publicar Artefatos de Build'
+- script: |
+    python -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+  displayName: 'Configurar Ambiente Python'
 
-- job: DeployDev
-  displayName: 'Deploy to Dev Job'
-  dependsOn: Build
-  condition: succeeded()
-  steps:
-  - download: current
-    artifact: drop
-    displayName: 'Baixar Artefatos de Build'
+- script: |
+    python -m dados  # Substitua pelo comando de teste real do seu aplicativo
+  displayName: 'Executar Testes'
 
-  - script: |
-      # Realize a implantação no ambiente de desenvolvimento
-      # Isso pode incluir o upload dos artefatos para um servidor ou plataforma de hospedagem
-      echo 'Implantando no ambiente de desenvolvimento'
-    displayName: 'Implantar no Ambiente de Desenvolvimento'
+- script: |
+    python dados.py  # Substitua pelo comando para executar o aplicativo
+    populacao.py
+  displayName: 'Executar Aplicativo'
 
-- job: DeployProd
-  displayName: 'Deploy to Prod Job'
-  dependsOn: DeployDev
-  condition: succeeded()
-  steps:
-  - script: |
-      # Realize a implantação no ambiente de produção
-      # Isso pode incluir o upload dos artefatos para um servidor ou plataforma de hospedagem
-      echo 'Implantando no ambiente de produção'
-    displayName: 'Implantar no Ambiente de Produção'
+# Aqui você pode adicionar etapas para empacotar seu aplicativo ou implantá-lo em um servidor ou plataforma específica.
